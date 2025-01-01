@@ -20,6 +20,8 @@ builder.Services.AddDbContext<ApplicationDbContext>(opt =>
 });
 
 builder.Services.AddScoped<IRegionRepository, RegionRepository>();
+builder.Services.AddScoped<IWalkRepository, WalkRepository>();
+builder.Services.AddScoped<IDifficultyRepository, DifficultyRepository>();
 
 builder.Services.AddAutoMapper(typeof(AutoMapperProfiles));
 
