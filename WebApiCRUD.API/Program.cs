@@ -1,5 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using WebApiCRUD.API.Data;
+using WebApiCRUD.API.Mapping;
+using WebApiCRUD.API.Repositories.Classes;
+using WebApiCRUD.API.Repositories.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,6 +18,10 @@ builder.Services.AddDbContext<ApplicationDbContext>(opt =>
 {
     opt.UseSqlServer(builder.Configuration.GetConnectionString("WebApiCRUDConnectionString"));
 });
+
+builder.Services.AddScoped<IRegionRepository, RegionRepository>();
+
+builder.Services.AddAutoMapper(typeof(AutoMapperProfiles));
 
 var app = builder.Build();
 
