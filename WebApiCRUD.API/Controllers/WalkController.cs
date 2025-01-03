@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using WebApiCRUD.API.CustomActionFilter;
 using WebApiCRUD.API.Domain.DTO.Walks;
 using WebApiCRUD.API.Domain.Entity;
 using WebApiCRUD.API.Repositories.Interfaces;
@@ -21,22 +22,19 @@ namespace WebApiCRUD.API.Controllers
         }
 
         [HttpPost]
+        [ValidateModel]
         public async Task<IActionResult> Create([FromBody] AddWalkDTO request)
         {
-            if(ModelState.IsValid)
-            {
-                var walk = await _walkRepository.CreateAsync(_mapper.Map<Walk>(request));
+            var walk = await _walkRepository.CreateAsync(_mapper.Map<Walk>(request));
 
-                return Ok(_mapper.Map<WalkDTO>(walk));
-            }
-            return BadRequest(ModelState);
+            return Ok(_mapper.Map<WalkDTO>(walk));
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAll([FromQuery]string? filterOne, [FromQuery]string? filterQuery, [FromQuery]string? sortBy, 
-            [FromQuery]bool? isAscending, [FromQuery]int pageNumber = 1, [FromQuery]int pageSize = 100)
+        public async Task<IActionResult> GetAll([FromQuery] string? filterOne, [FromQuery] string? filterQuery, [FromQuery] string? sortBy,
+            [FromQuery] bool? isAscending, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 100)
         {
-            var walks = await _walkRepository.GetAllAsync(filterOne, filterQuery, sortBy, isAscending ?? true , pageNumber, pageSize);
+            var walks = await _walkRepository.GetAllAsync(filterOne, filterQuery, sortBy, isAscending ?? true, pageNumber, pageSize);
 
             return Ok(_mapper.Map<List<WalkDTO>>(walks));
         }
@@ -54,24 +52,21 @@ namespace WebApiCRUD.API.Controllers
 
         [HttpPut]
         [Route("{id:guid}")]
-        public async Task<IActionResult> Update([FromRoute]Guid id, [FromBody]UpdateWalkDTO request)
+        [ValidateModel]
+        public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] UpdateWalkDTO request)
         {
-            if (ModelState.IsValid)
-            {
-                var walk = await _walkRepository.UpdateAsync(id, request);
+            var walk = await _walkRepository.UpdateAsync(id, request);
 
-                return Ok(_mapper.Map<WalkDTO>(walk));
-            }
-            return BadRequest(ModelState);
+            return Ok(_mapper.Map<WalkDTO>(walk));
         }
 
         [HttpDelete]
         [Route("{id:guid}")]
-        public async Task<IActionResult> Delete([FromRoute]Guid id)
+        public async Task<IActionResult> Delete([FromRoute] Guid id)
         {
             var walk = await _walkRepository.DeleteAsync(id);
 
-            if(walk == null)
+            if (walk == null)
                 return NotFound();
 
             return Ok(_mapper.Map<WalkDTO>(walk));

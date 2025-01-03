@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using WebApiCRUD.API.CustomActionFilter;
 using WebApiCRUD.API.Domain.DTO.Difficulties;
 using WebApiCRUD.API.Domain.Entity;
 using WebApiCRUD.API.Repositories.Interfaces;
@@ -22,7 +23,7 @@ namespace WebApiCRUD.API.Controllers
 
         [HttpGet]
         public async Task<IActionResult> GetAll()
-        {            
+        {
             return Ok(_mapper.Map<List<DifficultyDTO>>(await _difficultyRepository.GetAllAsync()));
         }
         [HttpGet]
@@ -32,45 +33,43 @@ namespace WebApiCRUD.API.Controllers
             var difficulty = await _difficultyRepository.GetByIdAsync(id);
 
             if (difficulty == null)
-                return NotFound(); 
-            
+                return NotFound();
+
             return Ok(_mapper.Map<DifficultyDTO>(difficulty));
         }
         [HttpPost]
+        [ValidateModel]
         public async Task<IActionResult> Create([FromBody] AddDifficultyDTO request)
         {
-            if(ModelState.IsValid)
-            {
-                var difficulty = await _difficultyRepository.CreateAsync(_mapper.Map<Difficulty>(request));
 
-                return CreatedAtAction(nameof(GetById), new { id = difficulty.Id }, _mapper.Map<DifficultyDTO>(difficulty));
-            }
-            return BadRequest(ModelState);
+            var difficulty = await _difficultyRepository.CreateAsync(_mapper.Map<Difficulty>(request));
+
+            return CreatedAtAction(nameof(GetById), new { id = difficulty.Id }, _mapper.Map<DifficultyDTO>(difficulty));
         }
+
         [HttpDelete]
         [Route("{id:guid}")]
-        public async Task<IActionResult> Delete([FromRoute]Guid id)
+        public async Task<IActionResult> Delete([FromRoute] Guid id)
         {
             var difficulty = await _difficultyRepository.DeleteAsync(id);
-            if(difficulty == null)
+            if (difficulty == null)
                 return NotFound();
 
-            return Ok(_mapper.Map<DifficultyDTO>(difficulty)); 
+            return Ok(_mapper.Map<DifficultyDTO>(difficulty));
         }
+
         [HttpPut]
         [Route("{id:guid}")]
-        public async Task<IActionResult> Update([FromRoute]Guid id, [FromBody]UpdateDifficultyDTO request)
+        [ValidateModel]
+        public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] UpdateDifficultyDTO request)
         {
-            if(ModelState.IsValid)
-            {
-                var difficulty = await _difficultyRepository.UpdateAsync(id,request);
 
-                if (difficulty == null)
-                    return NotFound();
+            var difficulty = await _difficultyRepository.UpdateAsync(id, request);
 
-                return Ok(_mapper.Map<DifficultyDTO>(difficulty));
-            }
-            return BadRequest(ModelState);
+            if (difficulty == null)
+                return NotFound();
+
+            return Ok(_mapper.Map<DifficultyDTO>(difficulty));
         }
     }
 }
