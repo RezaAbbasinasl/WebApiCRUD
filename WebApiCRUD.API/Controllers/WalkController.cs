@@ -35,7 +35,6 @@ namespace WebApiCRUD.API.Controllers
             [FromQuery] bool? isAscending, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 100)
         {
             var walks = await _walkRepository.GetAllAsync(filterOne, filterQuery, sortBy, isAscending ?? true, pageNumber, pageSize);
-
             return Ok(_mapper.Map<List<WalkDTO>>(walks));
         }
 

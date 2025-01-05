@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using WebApiCRUD.API.CustomActionFilter;
@@ -22,6 +23,7 @@ namespace WebApiCRUD.API.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles ="Reader")]
         public async Task<IActionResult> GetAll()
         {
             return Ok(_mapper.Map<List<DifficultyDTO>>(await _difficultyRepository.GetAllAsync()));

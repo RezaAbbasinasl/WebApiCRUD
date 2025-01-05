@@ -11,33 +11,39 @@ namespace WebApiCRUD.API.Controllers
 {
     [Route("[controller]")]
     [ApiController]
-    [Authorize]
+    //[Authorize]
     public class RegionController : ControllerBase
     {
         private readonly IRegionRepository _regionRepository;
         private readonly IMapper _mapper;
+        private readonly ILogger<RegionController> _logger;
 
-        public RegionController(IRegionRepository regionRepository, IMapper mapper)
+        public RegionController(IRegionRepository regionRepository, IMapper mapper, ILogger<RegionController> logger)
         {
             _regionRepository = regionRepository;
             _mapper = mapper;
+            _logger = logger;
         }
 
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
             var regions = await _regionRepository.GetAllAsync();
-
+            _logger.LogInformation("GetAll Regions successfully.");
             return Ok(_mapper.Map<List<RegionDTO>>(regions));
         }
+
         [HttpGet]
         [Route("{id:guid}")]
         public async Task<IActionResult> GetById([FromRoute] Guid id)
         {
             var region = await _regionRepository.GetByIdAsync(id);
             if (region == null)
+            {
+                _logger.LogError($"Region {id} NotFound.");
                 return NotFound();
-
+            }
+            _logger.LogInformation($"Region {id} Successfully.");
             return Ok(_mapper.Map<RegionDTO>(region));
         }
 
@@ -45,11 +51,9 @@ namespace WebApiCRUD.API.Controllers
         [ValidateModel]
         public async Task<IActionResult> Create([FromBody] AddRegionDTO request)
         {
-
             var region = await _regionRepository.CreateAsync(_mapper.Map<Region>(request));
-
+            _logger.LogInformation("Created Region Successfully");
             return CreatedAtAction(nameof(GetById), new { id = region.Id }, _mapper.Map<RegionDTO>(region));
-
         }
 
         [HttpPut]

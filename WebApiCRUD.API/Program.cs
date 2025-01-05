@@ -1,22 +1,62 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using WebApiCRUD.API.Data;
 using WebApiCRUD.API.Mapping;
 using WebApiCRUD.API.Repositories.Classes;
 using WebApiCRUD.API.Repositories.Interfaces;
+using Microsoft.OpenApi.Models;
+using Serilog;
+using WebApiCRUD.API.Middlewares;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
+var logger = new LoggerConfiguration()
+    .WriteTo.Console()
+    .WriteTo.File("Logs/WebApiCRUD_Log.txt", rollingInterval:RollingInterval.Minute)
+    .MinimumLevel.Information()
+    .CreateLogger();
+
+builder.Logging.ClearProviders();
+builder.Logging.AddSerilog(logger);
+
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(opt =>
+{
+    // Authorization in Swagger
+    opt.SwaggerDoc("v1", new OpenApiInfo { Title = "WebApiCRUD", Version = "v1" });
+    opt.AddSecurityDefinition(JwtBearerDefaults.AuthenticationScheme, new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.ApiKey,
+        Scheme = JwtBearerDefaults.AuthenticationScheme
+    });
+    opt.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = JwtBearerDefaults.AuthenticationScheme
+                },
+                Scheme = "Oauth2",
+                Name = JwtBearerDefaults.AuthenticationScheme,
+                In = ParameterLocation.Header
+            },
+            new List<string>()
+        }
+    });
+});
 
 
 builder.Services.AddDbContext<ApplicationDbContext>(opt =>
@@ -74,6 +114,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseMiddleware<ExceptionHandlerMiddleware>();
 
 app.UseHttpsRedirection();
 
