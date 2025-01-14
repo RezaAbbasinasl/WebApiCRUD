@@ -1,0 +1,22 @@
+﻿@model RegionDTO
+
+
+<div class="d-flex justify-content-center flex-column h5">
+    <div class="mt-3">
+        <label class="form-label">Code : </label>
+        <span>@Model.Code</span>
+    </div>
+    <div class="mt-3">
+        <label class="form-label">Name : </label>
+        <span>@Model.Name</span>
+    </div>
+    <div class="mt-3">
+        <label class="form-label">Image URL : </label>
+        <span>@Model.RegionImageUrl</span>
+    </div>
+    <div class="mt-3">
+        <a class="card-link" asp-controller="Region" asp-action="Edit" asp-route-id="@Model.Id">Edit</a>
+        <a class="card-link" asp-controller="Region" asp-action="Delete" asp-route-id="@Model.Id">Delete</a>
+        <a class="card-link" asp-controller="Region" asp-action="index">Back to view</a>
+    </div>
+</div>
